@@ -1,0 +1,21 @@
+name: Governed Work Item
+about: Bounded public-preview work request
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Authority source
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
