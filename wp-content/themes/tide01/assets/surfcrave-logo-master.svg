@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" role="img" aria-labelledby="t d">
+<title id="t">SURFCRAVE</title><desc id="d">Orange sunset and teal curling wave with SURFCRAVE wordmark.</desc>
+<rect width="720" height="260" fill="none"/>
+<g transform="translate(25 10)">
+  <circle cx="105" cy="95" r="72" fill="#F26722"/>
+  <path d="M35 112c44 0 88-2 132-4M45 128c35 0 69-2 103-5M58 143c27 0 52-2 78-5" fill="none" stroke="#F7F3E6" stroke-width="8"/>
+  <path d="M85 155c24-78 124-104 177-44 30 33 28 82-6 112-24 21-62 25-87 7 43 5 72-25 65-58-8-38-51-50-82-32-17 10-27 28-29 47-15-6-29-17-38-32Z" fill="#0E5A5A"/>
+  <path d="M105 154c32-42 96-41 126-2-24-20-61-18-84 4-13 13-20 30-19 48-17-11-25-31-23-50Z" fill="#F7F3E6"/>
+</g>
+<text x="300" y="115" fill="#F7F3E6" font-family="Arial Black,Impact,sans-serif" font-size="68" font-weight="900" letter-spacing="-4">SURFCRAVE</text>
+<text x="305" y="154" fill="#71E8D8" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="7">SEA. STREET. FREEDOM.</text>
+<text x="305" y="196" fill="#F26722" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="5">MORE WAVES. LESS RULES.</text>
+</svg>
