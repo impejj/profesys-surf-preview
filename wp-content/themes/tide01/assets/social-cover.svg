@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" role="img" aria-label="SURFCRAVE — Sea. Street. Freedom.">
+<rect width="1500" height="500" fill="#071112"/>
+<circle cx="320" cy="210" r="155" fill="#F26722"/>
+<path d="M140 360c44-163 247-212 348-89 57 70 39 172-37 218-58 35-139 31-191-12 99 11 162-65 129-139-35-78-132-85-188-25-29 31-42 73-37 114-33-19-45-45-24-67Z" fill="#0E5A5A"/>
+<path d="M173 363c64-89 198-95 265-13-58-40-141-26-181 36-19 30-25 64-17 97-52-24-81-70-67-120Z" fill="#F7F3E6"/>
+<text x="600" y="205" fill="#F7F3E6" font-family="Arial Black,Impact,sans-serif" font-size="112" font-weight="900" letter-spacing="-6">SURFCRAVE</text>
+<text x="610" y="275" fill="#71E8D8" font-family="Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="12">SEA. STREET. FREEDOM.</text>
+<text x="610" y="345" fill="#F26722" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="9">MORE WAVES. LESS RULES.</text>
+</svg>
