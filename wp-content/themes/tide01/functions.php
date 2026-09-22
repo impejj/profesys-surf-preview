@@ -162,7 +162,7 @@ add_action('init', function () {
 
 /* SURFCRAVE German storefront locale — 2026-09-22 */
 add_action('init', function () {
-    if (!current_user_can('manage_options') || get_option('surfcrave_de_locale_20260922_v1')) return;
+    if (get_option('surfcrave_de_locale_20260922_v1')) return;
     require_once ABSPATH . 'wp-admin/includes/translation-install.php';
     $report = ['started_at'=>current_time('mysql'),'before'=>get_option('WPLANG','')];
     if (!in_array('de_DE', get_available_languages(), true) && function_exists('wp_download_language_pack')) {
@@ -170,9 +170,19 @@ add_action('init', function () {
         $report['language_pack'] = is_wp_error($downloaded) ? $downloaded->get_error_message() : $downloaded;
     }
     update_option('WPLANG', 'de_DE');
-    $uid = get_current_user_id();
-    if ($uid) update_user_meta($uid, 'locale', 'es_ES');
+    update_user_meta(1, 'locale', 'es_ES');
     $report['after'] = get_option('WPLANG','');
     $report['finished_at'] = current_time('mysql');
     update_option('surfcrave_de_locale_20260922_v1', $report, false);
 }, 6);
+
+
+/* SURFCRAVE legacy commerce redirects — 2026-09-22 */
+add_action('template_redirect', function () {
+    $path = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
+    $map = ['cart'=>'warenkorb','checkout'=>'kasse','my-account'=>'mein-konto'];
+    if (isset($map[$path])) {
+        wp_safe_redirect(home_url('/'.$map[$path].'/'), 301);
+        exit;
+    }
+});
