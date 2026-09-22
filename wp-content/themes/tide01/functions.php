@@ -177,3 +177,31 @@ add_action('template_redirect', function () {
         exit;
     }
 });
+
+
+/* SURFCRAVE Polylang stable normalization — 2026-09-22 */
+add_action('init', function () {
+    if (!current_user_can('manage_options') || get_option('surfcrave_polylang_stable_20260922_v1')) return;
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+    $report=['started_at'=>current_time('mysql')];
+    $plugin='polylang/polylang.php';
+    $plugins=get_plugins();
+    $version=isset($plugins[$plugin]['Version']) ? $plugins[$plugin]['Version'] : '';
+    $report['before']=$version;
+    if ($version && $version !== '3.8.9') {
+        if (is_plugin_active($plugin)) deactivate_plugins($plugin, true);
+        $deleted=delete_plugins([$plugin]);
+        $report['deleted']=is_wp_error($deleted)?$deleted->get_error_message():$deleted;
+        $upgrader=new Plugin_Upgrader(new Automatic_Upgrader_Skin());
+        $installed=$upgrader->install('https://downloads.wordpress.org/plugin/polylang.3.8.9.zip');
+        $report['installed']=is_wp_error($installed)?$installed->get_error_message():(bool)$installed;
+        wp_clean_plugins_cache(true);
+    }
+    $plugins=get_plugins();
+    $report['after']=isset($plugins[$plugin]['Version']) ? $plugins[$plugin]['Version'] : '';
+    $report['active']=is_plugin_active($plugin);
+    $report['finished_at']=current_time('mysql');
+    update_option('surfcrave_polylang_stable_20260922_v1',$report,false);
+}, 7);
