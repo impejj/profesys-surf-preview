@@ -158,3 +158,21 @@ add_action('init', function () {
     $report['finished_at'] = current_time('mysql');
     update_option('surfcrave_germanized_install_20260922_v1', $report, false);
 }, 5);
+
+
+/* SURFCRAVE German storefront locale — 2026-09-22 */
+add_action('init', function () {
+    if (!current_user_can('manage_options') || get_option('surfcrave_de_locale_20260922_v1')) return;
+    require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+    $report = ['started_at'=>current_time('mysql'),'before'=>get_option('WPLANG','')];
+    if (!in_array('de_DE', get_available_languages(), true) && function_exists('wp_download_language_pack')) {
+        $downloaded = wp_download_language_pack('de_DE');
+        $report['language_pack'] = is_wp_error($downloaded) ? $downloaded->get_error_message() : $downloaded;
+    }
+    update_option('WPLANG', 'de_DE');
+    $uid = get_current_user_id();
+    if ($uid) update_user_meta($uid, 'locale', 'es_ES');
+    $report['after'] = get_option('WPLANG','');
+    $report['finished_at'] = current_time('mysql');
+    update_option('surfcrave_de_locale_20260922_v1', $report, false);
+}, 6);
