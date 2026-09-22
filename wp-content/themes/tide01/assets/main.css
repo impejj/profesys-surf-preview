@@ -410,7 +410,7 @@ linear-gradient(160deg,var(--sc-cream) 0 31%,#e4f4f0 31.2% 53%,#0e6769 53.2% 100
   margin:0!important;
   background:transparent;
 }
-.shop-wrap-v2 ul.products li.product a img{display:none!important}
+.shop-wrap-v2 ul.products li.product > a > img{display:none!important}
 .shop-wrap-v2 ul.products li.product .woocommerce-loop-product__title{
   font-size:16px!important;
   padding:14px 0 4px!important;
@@ -492,3 +492,10 @@ linear-gradient(160deg,var(--sc-cream) 0 31%,#e4f4f0 31.2% 53%,#0e6769 53.2% 100
   .shop-wrap-v2 .tide-product-art{height:430px}
   .shop-brand-close{margin:0 5vw 10vw;padding:13vw 7vw}
 }
+
+
+/* WooCommerce assigned product photography — V1.0.3 */
+.tide-product-art.tide-product-photo{display:flex;align-items:center;justify-content:center;background:#f3f0e8;isolation:auto}
+.tide-product-art.tide-product-photo .tide-product-image{display:block!important;width:100%!important;height:100%!important;max-width:none!important;margin:0!important;padding:3%;object-fit:contain;object-position:center;background:#f3f0e8}
+.woocommerce div.product .tide-product-art.tide-product-photo .tide-product-image{padding:2%}
+@media(max-width:620px){.tide-product-art.tide-product-photo .tide-product-image{padding:2%}}
