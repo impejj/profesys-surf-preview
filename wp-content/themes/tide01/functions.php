@@ -205,3 +205,28 @@ add_action('init', function () {
     $report['finished_at']=current_time('mysql');
     update_option('surfcrave_polylang_stable_20260922_v1',$report,false);
 }, 7);
+
+
+/* SURFCRAVE async German language pack — 2026-09-22 */
+add_action('surfcrave_install_de_language_pack', function () {
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+    $report=['started_at'=>current_time('mysql')];
+    $result=function_exists('wp_download_language_pack') ? wp_download_language_pack('de_DE') : new WP_Error('missing_function','wp_download_language_pack unavailable');
+    $report['download']=is_wp_error($result)?$result->get_error_message():$result;
+    if (!is_wp_error($result) && $result) update_option('WPLANG','de_DE');
+    $report['locale_option']=get_option('WPLANG','');
+    $report['available']=get_available_languages();
+    $report['finished_at']=current_time('mysql');
+    update_option('surfcrave_de_language_pack_result_20260922_v3',$report,false);
+}, 10);
+add_action('init', function () {
+    if (get_option('surfcrave_de_language_pack_scheduled_20260922_v3')) return;
+    if (function_exists('as_enqueue_async_action')) {
+        as_enqueue_async_action('surfcrave_install_de_language_pack', [], 'surfcrave');
+        update_option('surfcrave_de_language_pack_scheduled_20260922_v3','action-scheduler',false);
+    } else {
+        wp_schedule_single_event(time()+5,'surfcrave_install_de_language_pack');
+        update_option('surfcrave_de_language_pack_scheduled_20260922_v3','wp-cron',false);
+    }
+}, 99);
