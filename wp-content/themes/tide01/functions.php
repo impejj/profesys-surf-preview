@@ -19,3 +19,52 @@ add_action('init',function(){if(class_exists('WooCommerce')){remove_action('wooc
 add_filter('woocommerce_product_query_meta_query',function($mq){if(!empty($_GET['collection'])){$name=tide01_collection_name_from_slug(sanitize_key($_GET['collection']));if($name)$mq[]=['key'=>'_tide_collection','value'=>$name];}return $mq;});
 add_filter('woocommerce_add_to_cart_text',fn()=>'Quiero este');add_filter('woocommerce_product_single_add_to_cart_text',fn()=>'Quiero este producto');
 add_action('woocommerce_single_product_summary',function(){global $product;if(!$product)return;$name=get_post_meta($product->get_id(),'_tide_collection',true);$mood=get_post_meta($product->get_id(),'_tide_mood',true);if($name)echo '<div class="product-collection-note"><strong>SURFCRAVE · '.esc_html($name).'</strong><span>'.esc_html($mood).'</span></div>';},6);
+
+
+/* SURFCRAVE catalog media migration — 2026-09-22 */
+add_action('init', function () {
+    if (!class_exists('WooCommerce') || get_option('surfcrave_catalog_media_migration_20260922_v1')) return;
+
+    $map = [
+        'SC-SC-001' => [84, 38, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-002' => [83, 34, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-003' => [81, 62, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-004' => [82, 44, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-005' => [80, 48, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-006' => [79, 28, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-007' => [78, 55, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-008' => [77, 22, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-009' => [76, 19, 'SUNSET CLUB', 'Todo el día'],
+        'SC-SC-010' => [75, 12, 'SUNSET CLUB', 'Todo el día'],
+        'SC-BW-001' => [69, 39, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-002' => [68, 58, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-003' => [70, 74, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-004' => [63, 56, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-005' => [67, 89, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-006' => [66, 39, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-007' => [62, 29, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-008' => [61, 36, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-009' => [65, 44, 'BLACK WATER', 'Salidas nocturnas'],
+        'SC-BW-010' => [64, 24, 'BLACK WATER', 'Salidas nocturnas'],
+    ];
+
+    $report = ['updated' => [], 'missing_sku' => [], 'missing_media' => []];
+    foreach ($map as $sku => [$attachment_id, $price, $collection, $mood]) {
+        $product_id = wc_get_product_id_by_sku($sku);
+        if (!$product_id) { $report['missing_sku'][] = $sku; continue; }
+        if (get_post_type($attachment_id) !== 'attachment') { $report['missing_media'][] = $sku; continue; }
+        $product = wc_get_product($product_id);
+        if (!$product) { $report['missing_sku'][] = $sku; continue; }
+        $product->set_image_id($attachment_id);
+        $product->set_regular_price((string) $price);
+        $product->set_price((string) $price);
+        $product->save();
+        update_post_meta($product_id, '_tide_collection', $collection);
+        update_post_meta($product_id, '_tide_mood', $mood);
+        $report['updated'][] = $sku;
+    }
+    update_option('woocommerce_currency', 'EUR');
+    $report['currency'] = get_option('woocommerce_currency');
+    $report['ran_at'] = current_time('mysql');
+    update_option('surfcrave_catalog_media_migration_20260922_v1', $report, false);
+}, 40);
