@@ -107,3 +107,54 @@ add_action('init', function () {
     $report['ran_at'] = current_time('mysql');
     update_option('surfcrave_rasta_media_migration_20260922_v1', $report, false);
 }, 41);
+
+
+/* SURFCRAVE Germanized controlled install — 2026-09-22 */
+add_action('init', function () {
+    if (!current_user_can('manage_options') || get_option('surfcrave_germanized_install_20260922_v1')) return;
+
+    $snapshot_keys = [
+        'woocommerce_currency','woocommerce_default_country','woocommerce_allowed_countries',
+        'woocommerce_all_except_countries','woocommerce_specific_allowed_countries','woocommerce_ship_to_countries',
+        'woocommerce_specific_ship_to_countries','woocommerce_calc_taxes','woocommerce_prices_include_tax',
+        'woocommerce_tax_based_on','woocommerce_shop_page_id','woocommerce_cart_page_id',
+        'woocommerce_checkout_page_id','woocommerce_myaccount_page_id'
+    ];
+    $snapshot = [];
+    foreach ($snapshot_keys as $key) $snapshot[$key] = get_option($key, null);
+    update_option('surfcrave_pre_germanized_snapshot_20260922', $snapshot, false);
+
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+    $report = ['started_at'=>current_time('mysql'),'installed'=>false,'activated'=>false,'plugin'=>''];
+    $plugins = get_plugins();
+    $plugin_file = '';
+    foreach (array_keys($plugins) as $file) {
+        if (strpos($file, 'woocommerce-germanized/') === 0) { $plugin_file = $file; break; }
+    }
+
+    if (!$plugin_file) {
+        $upgrader = new Plugin_Upgrader(new Automatic_Upgrader_Skin());
+        $result = $upgrader->install('https://downloads.wordpress.org/plugin/woocommerce-germanized.latest-stable.zip');
+        $report['install_result'] = is_wp_error($result) ? $result->get_error_message() : (bool)$result;
+        wp_clean_plugins_cache(true);
+        $plugins = get_plugins();
+        foreach (array_keys($plugins) as $file) {
+            if (strpos($file, 'woocommerce-germanized/') === 0) { $plugin_file = $file; break; }
+        }
+    }
+
+    if ($plugin_file) {
+        $report['installed'] = true;
+        $report['plugin'] = $plugin_file;
+        if (!is_plugin_active($plugin_file)) {
+            $activation = activate_plugin($plugin_file);
+            $report['activation_result'] = is_wp_error($activation) ? $activation->get_error_message() : 'ok';
+        }
+        $report['activated'] = is_plugin_active($plugin_file);
+    }
+    $report['finished_at'] = current_time('mysql');
+    update_option('surfcrave_germanized_install_20260922_v1', $report, false);
+}, 5);
