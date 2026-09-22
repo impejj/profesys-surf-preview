@@ -68,3 +68,42 @@ add_action('init', function () {
     $report['ran_at'] = current_time('mysql');
     update_option('surfcrave_catalog_media_migration_20260922_v1', $report, false);
 }, 40);
+
+
+/* SURFCRAVE Rasta media migration — 2026-09-22 */
+add_action('init', function () {
+    if (!class_exists('WooCommerce') || get_option('surfcrave_rasta_media_migration_20260922_v1')) return;
+
+    $map = [
+        'SC-RO-001' => [93, 36],
+        'SC-RO-002' => [94, 32],
+        'SC-RO-003' => [92, 68],
+        'SC-RO-004' => [91, 49],
+        'SC-RO-005' => [0, 42],
+        'SC-RO-006' => [90, 29],
+        'SC-RO-007' => [89, 27],
+        'SC-RO-008' => [85, 34],
+        'SC-RO-009' => [87, 18],
+        'SC-RO-010' => [86, 14],
+    ];
+
+    $report = ['updated' => [], 'missing_sku' => [], 'missing_media' => []];
+    foreach ($map as $sku => [$attachment_id, $price]) {
+        $product_id = wc_get_product_id_by_sku($sku);
+        if (!$product_id) { $report['missing_sku'][] = $sku; continue; }
+        $product = wc_get_product($product_id);
+        if (!$product) { $report['missing_sku'][] = $sku; continue; }
+        if ($attachment_id) {
+            if (get_post_type($attachment_id) === 'attachment') $product->set_image_id($attachment_id);
+            else $report['missing_media'][] = $sku;
+        }
+        $product->set_regular_price((string) $price);
+        $product->set_price((string) $price);
+        $product->save();
+        update_post_meta($product_id, '_tide_collection', 'RASTA ORIGINAL');
+        update_post_meta($product_id, '_tide_mood', 'Salidas de playa');
+        $report['updated'][] = $sku;
+    }
+    $report['ran_at'] = current_time('mysql');
+    update_option('surfcrave_rasta_media_migration_20260922_v1', $report, false);
+}, 41);
