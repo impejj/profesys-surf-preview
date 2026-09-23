@@ -281,3 +281,38 @@ add_action('init', function () {
     if ($existing) { $postarr['ID']=$existing->ID; wp_update_post($postarr); } else { wp_insert_post($postarr); }
     update_option('surfcrave_shop_diag_20260923_v1', $report, false);
 }, 90);
+
+
+/* SURFCRAVE shop rendered self-check — 2026-09-23 */
+add_action('init', function () {
+    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v1')) return;
+    update_option('surfcrave_shop_selfcheck_20260923_v1', ['state'=>'running'], false);
+
+    $url = add_query_arg('surfcrave_probe', '1', wc_get_page_permalink('shop'));
+    $res = wp_remote_get($url, ['timeout'=>20, 'redirection'=>3, 'sslverify'=>true]);
+    $report = ['url'=>$url, 'ran_at'=>current_time('mysql')];
+    if (is_wp_error($res)) {
+        $report['error']=$res->get_error_message();
+    } else {
+        $body = wp_remote_retrieve_body($res);
+        $report['http_code'] = (int)wp_remote_retrieve_response_code($res);
+        $report['body_length'] = strlen($body);
+        $report['surfcrave_loop_marker'] = substr_count($body, 'surfcrave-product-loop');
+        $report['product_li_count'] = preg_match_all('/<li[^>]+class=["\'][^"\']*product[^"\']*["\']/i', $body, $m);
+        $report['tide_product_art_count'] = substr_count($body, 'tide-product-art');
+        $report['no_products_message'] = (strpos($body, 'Keine Produkte in dieser Kollektion gefunden') !== false);
+        $report['sample_skus_present'] = [
+            'SC-RO-001' => strpos($body, 'SC-RO-001') !== false,
+            'SC-SC-001' => strpos($body, 'SC-SC-001') !== false,
+            'SC-BW-001' => strpos($body, 'SC-BW-001') !== false,
+        ];
+    }
+    update_option('surfcrave_shop_selfcheck_20260923_v1', $report, false);
+    $existing = get_page_by_path('surfcrave-shop-self-check', OBJECT, 'page');
+    $postarr = [
+        'post_type'=>'page','post_status'=>'draft','post_title'=>'SURFCRAVE SHOP SELF CHECK',
+        'post_name'=>'surfcrave-shop-self-check',
+        'post_content'=>'<pre>'.esc_html(wp_json_encode($report, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES)).'</pre>'
+    ];
+    if ($existing) { $postarr['ID']=$existing->ID; wp_update_post($postarr); } else { wp_insert_post($postarr); }
+}, 98);
