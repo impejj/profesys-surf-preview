@@ -285,10 +285,10 @@ add_action('init', function () {
 
 /* SURFCRAVE shop rendered self-check — 2026-09-23 */
 add_action('init', function () {
-    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v7')) return;
-    update_option('surfcrave_shop_selfcheck_20260923_v7', ['state'=>'running'], false);
+    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v8')) return;
+    update_option('surfcrave_shop_selfcheck_20260923_v8', ['state'=>'running'], false);
 
-    $url = add_query_arg(['surfcrave_probe'=>'v7','sc_nocache'=>'202609231916'], wc_get_page_permalink('shop'));
+    $url = add_query_arg(['surfcrave_probe'=>'v8','sc_nocache'=>'202609231920'], wc_get_page_permalink('shop'));
     $res = wp_remote_get($url, ['timeout'=>20, 'redirection'=>3, 'sslverify'=>true, 'headers'=>['Cache-Control'=>'no-cache','Pragma'=>'no-cache','Cookie'=>'wordpress_logged_in_surfcrave_probe=1']]);
     $report = ['url'=>$url, 'ran_at'=>current_time('mysql')];
     if (is_wp_error($res)) {
@@ -300,6 +300,17 @@ add_action('init', function () {
         $report['surfcrave_loop_marker'] = substr_count($body, 'surfcrave-product-loop');
         $report['product_li_count'] = preg_match_all('/<li[^>]+class=["\'][^"\']*product[^"\']*["\']/i', $body, $m);
         $report['tide_product_art_count'] = substr_count($body, 'tide-product-art');
+        $report['body_signals'] = [
+            'theme_asset' => strpos($body, 'wp-content/themes/surfcrave') !== false,
+            'prelaunch' => strpos($body, 'SURFCRAVE · PRE-LAUNCH / TEST DROP · DEUTSCHLAND FIRST') !== false,
+            'fallback_marker' => strpos($body, 'SURFCRAVE SHOP FALLBACK') !== false,
+            'find_your_line' => strpos($body, 'FIND YOUR LINE.') !== false,
+            'page_default' => strpos($body, 'page-default') !== false,
+            'shop_wrap_v2' => strpos($body, 'shop-wrap-v2') !== false,
+        ];
+        if (preg_match('/<h1[^>]*>(.*?)<\/h1>/is', $body, $hm)) {
+            $report['first_h1'] = trim(wp_strip_all_tags($hm[1]));
+        }
         $report['no_products_message'] = (strpos($body, 'Keine Produkte in dieser Kollektion gefunden') !== false);
         $report['sample_skus_present'] = [
             'SC-RO-001' => strpos($body, 'SC-RO-001') !== false,
@@ -307,7 +318,7 @@ add_action('init', function () {
             'SC-BW-001' => strpos($body, 'SC-BW-001') !== false,
         ];
     }
-    update_option('surfcrave_shop_selfcheck_20260923_v7', $report, false);
+    update_option('surfcrave_shop_selfcheck_20260923_v8', $report, false);
     $existing = get_page_by_path('surfcrave-shop-self-check', OBJECT, 'page');
     $postarr = [
         'post_type'=>'page','post_status'=>'draft','post_title'=>'SURFCRAVE SHOP SELF CHECK',
