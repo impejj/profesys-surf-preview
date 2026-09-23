@@ -88,7 +88,14 @@ $cfg    = $active ? tide01_collection_config($active) : null;
 
 <section class="shop-wrap shop-wrap-v2">
   <?php
-  if (is_shop() || is_product_taxonomy()) {
+  $surfcrave_path = trim((string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
+  $surfcrave_shop_id = function_exists('wc_get_page_id') ? (int) wc_get_page_id('shop') : 0;
+  $surfcrave_is_catalog = is_shop()
+      || is_product_taxonomy()
+      || ($surfcrave_shop_id && get_queried_object_id() === $surfcrave_shop_id)
+      || ($surfcrave_path === 'shop');
+
+  if ($surfcrave_is_catalog) {
       $args = [
           'post_type'      => 'product',
           'post_status'    => 'publish',
