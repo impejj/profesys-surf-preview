@@ -87,7 +87,43 @@ $cfg    = $active ? tide01_collection_config($active) : null;
 </section>
 
 <section class="shop-wrap shop-wrap-v2">
-  <?php woocommerce_content(); ?>
+  <?php
+  if (is_shop() || is_product_taxonomy()) {
+      $args = [
+          'post_type'      => 'product',
+          'post_status'    => 'publish',
+          'posts_per_page' => -1,
+          'orderby'        => ['menu_order' => 'ASC', 'title' => 'ASC'],
+          'order'          => 'ASC',
+      ];
+
+      if ($active) {
+          $args['meta_query'] = [[
+              'key'   => '_tide_collection',
+              'value' => $active,
+          ]];
+      }
+
+      $surfcrave_products = new WP_Query($args);
+
+      echo '<div class="woocommerce surfcrave-product-loop">';
+      if ($surfcrave_products->have_posts()) {
+          woocommerce_product_loop_start();
+          while ($surfcrave_products->have_posts()) {
+              $surfcrave_products->the_post();
+              wc_get_template_part('content', 'product');
+          }
+          woocommerce_product_loop_end();
+      } else {
+          echo '<div class="woocommerce-info">Keine Produkte in dieser Kollektion gefunden.</div>';
+      }
+      echo '</div>';
+
+      wp_reset_postdata();
+  } else {
+      woocommerce_content();
+  }
+  ?>
 </section>
 
 <section class="shop-brand-close">
