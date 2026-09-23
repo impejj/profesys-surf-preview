@@ -230,3 +230,54 @@ add_action('init', function () {
         update_option('surfcrave_de_language_pack_scheduled_20260922_v3','wp-cron',false);
     }
 }, 99);
+
+
+/* SURFCRAVE shop diagnostic — 2026-09-23 */
+add_action('init', function () {
+    if (!class_exists('WooCommerce') || get_option('surfcrave_shop_diag_20260923_v1')) return;
+
+    $report = [];
+    $counts = wp_count_posts('product');
+    $report['post_counts'] = [
+        'publish' => isset($counts->publish) ? (int)$counts->publish : 0,
+        'draft'   => isset($counts->draft) ? (int)$counts->draft : 0,
+        'private' => isset($counts->private) ? (int)$counts->private : 0,
+    ];
+    $report['shop_page_id'] = (int)get_option('woocommerce_shop_page_id');
+    $report['shop_permalink'] = wc_get_page_permalink('shop');
+    $report['hide_out_of_stock'] = get_option('woocommerce_hide_out_of_stock_items');
+
+    $all = wc_get_products(['status'=>'publish','limit'=>-1,'return'=>'objects']);
+    $report['wc_publish_total'] = count($all);
+    $report['catalog_visibility'] = ['visible'=>0,'catalog'=>0,'search'=>0,'hidden'=>0,'other'=>0];
+    $report['stock'] = ['instock'=>0,'outofstock'=>0,'onbackorder'=>0,'other'=>0];
+    $report['surfcrave'] = [];
+
+    foreach ($all as $p) {
+        $vis = $p->get_catalog_visibility();
+        if (isset($report['catalog_visibility'][$vis])) $report['catalog_visibility'][$vis]++; else $report['catalog_visibility']['other']++;
+        $stock = $p->get_stock_status();
+        if (isset($report['stock'][$stock])) $report['stock'][$stock]++; else $report['stock']['other']++;
+        if (strpos((string)$p->get_sku(), 'SC-') === 0) {
+            $report['surfcrave'][] = [
+                'id'=>$p->get_id(),'sku'=>$p->get_sku(),'status'=>$p->get_status(),
+                'visibility'=>$vis,'stock'=>$stock,'price'=>$p->get_price(),
+                'collection'=>get_post_meta($p->get_id(),'_tide_collection',true)
+            ];
+        }
+    }
+
+    $q = new WP_Query(['post_type'=>'product','post_status'=>'publish','posts_per_page'=>100,'fields'=>'ids']);
+    $report['raw_wp_query_count'] = (int)$q->found_posts;
+    $report['raw_wp_query_ids'] = array_map('intval',$q->posts);
+
+    $visibility = wc_get_product_visibility_term_ids();
+    $report['visibility_term_ids'] = $visibility;
+    $report['ran_at'] = current_time('mysql');
+
+    $body = '<pre>'.esc_html(wp_json_encode($report, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)).'</pre>';
+    $existing = get_page_by_path('surfcrave-shop-diagnostic', OBJECT, 'page');
+    $postarr = ['post_type'=>'page','post_status'=>'draft','post_title'=>'SURFCRAVE SHOP DIAGNOSTIC','post_name'=>'surfcrave-shop-diagnostic','post_content'=>$body];
+    if ($existing) { $postarr['ID']=$existing->ID; wp_update_post($postarr); } else { wp_insert_post($postarr); }
+    update_option('surfcrave_shop_diag_20260923_v1', $report, false);
+}, 90);
