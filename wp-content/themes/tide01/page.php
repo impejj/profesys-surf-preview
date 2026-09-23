@@ -1,3 +1,9 @@
+<?php
+if (function_exists('wc_get_page_id') && get_queried_object_id() === (int) wc_get_page_id('shop')) {
+    require get_template_directory() . '/woocommerce.php';
+    return;
+}
+?>
 <?php get_header(); $slug=get_post_field('post_name',get_post()); ?>
 <?php if($slug==='collections'): ?><section class="collections-hero"><span>SURFCRAVE / COLLECTION SYSTEM</span><h1>TRES LÍNEAS.<br><em>UNA ESENCIA.</em></h1><p>Rasta Original, Sunset Club y Black Water. Tres surfers originales, tres momentos y una misma cultura.</p></section><section class="section collections-page-grid"><?php tide01_collection_card('RASTA ORIGINAL',true); tide01_collection_card('SUNSET CLUB',true); tide01_collection_card('BLACK WATER',true); ?></section>
 <?php elseif($slug==='story'): ?><section class="story-hero"><span>THE STORY / SURFCRAVE</span><h1>MÁS MAR.<br><em>MÁS VIDA.<br>MÁS LIBERTAD.</em></h1><p>SURFCRAVE nace entre mar, calle y libertad. No es una copia de una marca surf: es una identidad propia construida alrededor de la necesidad de volver al océano.</p></section><section class="section story-grid"><div class="story-art"><img src="<?php echo esc_url(get_template_directory_uri().'/assets/surfcrave-logo-master.svg'); ?>" alt="SURFCRAVE"></div><div><span>WHY</span><h2>Crave the wave.</h2><p>El mar desgasta, limpia, mueve y vuelve a empezar. SURFCRAVE convierte esa obsesión en ropa, objetos y experiencias que siguen funcionando fuera del agua.</p><p>La marca se expresa en tres líneas: Rasta Original, Sunset Club y Black Water. Cada una conserva su personaje y lenguaje visual.</p></div></section>
