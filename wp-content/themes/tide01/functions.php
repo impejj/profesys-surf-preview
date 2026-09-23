@@ -285,11 +285,11 @@ add_action('init', function () {
 
 /* SURFCRAVE shop rendered self-check — 2026-09-23 */
 add_action('init', function () {
-    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v5')) return;
-    update_option('surfcrave_shop_selfcheck_20260923_v5', ['state'=>'running'], false);
+    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v6')) return;
+    update_option('surfcrave_shop_selfcheck_20260923_v6', ['state'=>'running'], false);
 
-    $url = add_query_arg(['surfcrave_probe'=>'v5','sc_nocache'=>'202609231910'], wc_get_page_permalink('shop'));
-    $res = wp_remote_get($url, ['timeout'=>20, 'redirection'=>3, 'sslverify'=>true, 'headers'=>['Cache-Control'=>'no-cache','Pragma'=>'no-cache']]);
+    $url = add_query_arg(['surfcrave_probe'=>'v6','sc_nocache'=>'202609231912'], wc_get_page_permalink('shop'));
+    $res = wp_remote_get($url, ['timeout'=>20, 'redirection'=>3, 'sslverify'=>true, 'headers'=>['Cache-Control'=>'no-cache','Pragma'=>'no-cache','Cookie'=>'wordpress_logged_in_surfcrave_probe=1']]);
     $report = ['url'=>$url, 'ran_at'=>current_time('mysql')];
     if (is_wp_error($res)) {
         $report['error']=$res->get_error_message();
@@ -307,7 +307,7 @@ add_action('init', function () {
             'SC-BW-001' => strpos($body, 'SC-BW-001') !== false,
         ];
     }
-    update_option('surfcrave_shop_selfcheck_20260923_v5', $report, false);
+    update_option('surfcrave_shop_selfcheck_20260923_v6', $report, false);
     $existing = get_page_by_path('surfcrave-shop-self-check', OBJECT, 'page');
     $postarr = [
         'post_type'=>'page','post_status'=>'draft','post_title'=>'SURFCRAVE SHOP SELF CHECK',
