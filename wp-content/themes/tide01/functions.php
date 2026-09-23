@@ -285,8 +285,8 @@ add_action('init', function () {
 
 /* SURFCRAVE shop rendered self-check — 2026-09-23 */
 add_action('init', function () {
-    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v3')) return;
-    update_option('surfcrave_shop_selfcheck_20260923_v3', ['state'=>'running'], false);
+    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v4')) return;
+    update_option('surfcrave_shop_selfcheck_20260923_v4', ['state'=>'running'], false);
 
     $url = add_query_arg('surfcrave_probe', '1', wc_get_page_permalink('shop'));
     $res = wp_remote_get($url, ['timeout'=>20, 'redirection'=>3, 'sslverify'=>true]);
@@ -307,7 +307,7 @@ add_action('init', function () {
             'SC-BW-001' => strpos($body, 'SC-BW-001') !== false,
         ];
     }
-    update_option('surfcrave_shop_selfcheck_20260923_v3', $report, false);
+    update_option('surfcrave_shop_selfcheck_20260923_v4', $report, false);
     $existing = get_page_by_path('surfcrave-shop-self-check', OBJECT, 'page');
     $postarr = [
         'post_type'=>'page','post_status'=>'draft','post_title'=>'SURFCRAVE SHOP SELF CHECK',
@@ -316,3 +316,17 @@ add_action('init', function () {
     ];
     if ($existing) { $postarr['ID']=$existing->ID; wp_update_post($postarr); } else { wp_insert_post($postarr); }
 }, 98);
+
+
+/* SURFCRAVE force Woo shop template — 2026-09-23 */
+add_filter('template_include', function ($template) {
+    if (!function_exists('wc_get_page_id')) return $template;
+    $shop_id = (int) wc_get_page_id('shop');
+    $path = trim((string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
+    $is_shop_path = ($path === 'shop');
+    if (is_shop() || is_page($shop_id) || get_queried_object_id() === $shop_id || $is_shop_path) {
+        $forced = get_template_directory() . '/woocommerce.php';
+        if (file_exists($forced)) return $forced;
+    }
+    return $template;
+}, 9999);
