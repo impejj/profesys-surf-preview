@@ -285,10 +285,10 @@ add_action('init', function () {
 
 /* SURFCRAVE shop rendered self-check — 2026-09-23 */
 add_action('init', function () {
-    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v8')) return;
-    update_option('surfcrave_shop_selfcheck_20260923_v8', ['state'=>'running'], false);
+    if (isset($_GET['surfcrave_probe']) || get_option('surfcrave_shop_selfcheck_20260923_v9')) return;
+    update_option('surfcrave_shop_selfcheck_20260923_v9', ['state'=>'running'], false);
 
-    $url = add_query_arg(['surfcrave_probe'=>'v8','sc_nocache'=>'202609231920'], wc_get_page_permalink('shop'));
+    $url = add_query_arg(['surfcrave_probe'=>'v9','sc_nocache'=>'202609231925'], wc_get_page_permalink('shop'));
     $res = wp_remote_get($url, ['timeout'=>20, 'redirection'=>3, 'sslverify'=>true, 'headers'=>['Cache-Control'=>'no-cache','Pragma'=>'no-cache','Cookie'=>'wordpress_logged_in_surfcrave_probe=1']]);
     $report = ['url'=>$url, 'ran_at'=>current_time('mysql')];
     if (is_wp_error($res)) {
@@ -318,7 +318,7 @@ add_action('init', function () {
             'SC-BW-001' => strpos($body, 'SC-BW-001') !== false,
         ];
     }
-    update_option('surfcrave_shop_selfcheck_20260923_v8', $report, false);
+    update_option('surfcrave_shop_selfcheck_20260923_v9', $report, false);
     $existing = get_page_by_path('surfcrave-shop-self-check', OBJECT, 'page');
     $postarr = [
         'post_type'=>'page','post_status'=>'draft','post_title'=>'SURFCRAVE SHOP SELF CHECK',
@@ -351,3 +351,12 @@ add_action('init', function () {
     if (function_exists('wc_delete_product_transients')) wc_delete_product_transients();
     update_option('surfcrave_cache_purge_20260923_v1', current_time('mysql'), false);
 }, 97);
+
+
+/* SURFCRAVE WooCommerce live storefront — 2026-09-23 */
+add_action('init', function () {
+    if (get_option('surfcrave_wc_live_20260923_v1')) return;
+    update_option('woocommerce_coming_soon', 'no');
+    update_option('woocommerce_store_pages_only', 'no');
+    update_option('surfcrave_wc_live_20260923_v1', current_time('mysql'), false);
+}, 1);
